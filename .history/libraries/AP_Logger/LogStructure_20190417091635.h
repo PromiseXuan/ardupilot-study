@@ -4,10 +4,9 @@
   unfortunately these need to be macros because of a limitation of
   named member structure initialisation in g++
  */
-//这个定义是什么意思？宏定义三个值
-#define LOG_PACKET_HEADER	       uint8_t head1, head2, msgid;//`日志包头`
-#define LOG_PACKET_HEADER_INIT(id) head1 : HEAD_BYTE1, head2 : HEAD_BYTE2, msgid : id //`文件头初始化(head1:0xA3,head2:0x95, msgid:id)`
-#define LOG_PACKET_HEADER_LEN 3 // bytes required for LOG_PACKET_HEADER  //`文件头长度，3`
+#define LOG_PACKET_HEADER	       uint8_t head1, head2, msgid;
+#define LOG_PACKET_HEADER_INIT(id) head1 : HEAD_BYTE1, head2 : HEAD_BYTE2, msgid : id
+#define LOG_PACKET_HEADER_LEN 3 // bytes required for LOG_PACKET_HEADER
 
 // once the logging code is all converted we will remove these from
 // this header
@@ -15,47 +14,42 @@
 #define HEAD_BYTE2  0x95    // Decimal 149
 
 // structure used to define logging format
-//Log结构体，定义Log的格式
 struct LogStructure {
-    uint8_t msg_type; //信息message的类型
-    uint8_t msg_len;  //信息长度
-    const char *name; //字符串表名字
-    const char *format; //格式
-    const char *labels; //标签
-    const char *units;  //单位
-    const char *multipliers; //乘法器？
+    uint8_t msg_type;
+    uint8_t msg_len;
+    const char *name;
+    const char *format;
+    const char *labels;
+    const char *units;
+    const char *multipliers;
 };
 
 // maximum lengths of fields in LogStructure, including trailing nulls
-//LogStructure里面值的最大长度，包括尾随空值
-static const uint8_t LS_NAME_SIZE = 5;//name 的最大长度为5
-static const uint8_t LS_FORMAT_SIZE = 17;//format:17
-static const uint8_t LS_LABELS_SIZE = 65;//labels:65
-static const uint8_t LS_UNITS_SIZE = 17;//units:17
-static const uint8_t LS_MULTIPLIERS_SIZE = 17;//mulitpliers:17
+static const uint8_t LS_NAME_SIZE = 5;
+static const uint8_t LS_FORMAT_SIZE = 17;
+static const uint8_t LS_LABELS_SIZE = 65;
+static const uint8_t LS_UNITS_SIZE = 17;
+static const uint8_t LS_MULTIPLIERS_SIZE = 17;
 
 /*
   log structures common to all vehicle types
  */
-//所有载具类型的log结构体的公共部分
 struct PACKED log_Format {
-    LOG_PACKET_HEADER; //日志包头
-    uint8_t type;//类型
-    uint8_t length;//长度
-    char name[4];//名字
-    char format[16];//格式
-    char labels[64];//标签
+    LOG_PACKET_HEADER;
+    uint8_t type;
+    uint8_t length;
+    char name[4];
+    char format[16];
+    char labels[64];
 };
 
-//Unit单位
 struct PACKED log_Unit {
-    LOG_PACKET_HEADER;//包头
-    uint64_t time_us;//时间
-    char type;//类型
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    char type;
     char unit[64]; // you know, this might be overkill...
 };
 
-//Multiplier
 struct PACKED log_Format_Multiplier {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -71,13 +65,11 @@ struct PACKED log_Format_Units {
     char multipliers[16];
 };
 
-//结构单元
 struct UnitStructure {
-    const char ID;//ID
-    const char *unit;//unit单元 字符串
+    const char ID;
+    const char *unit;
 };
 
-//结构Multiplier
 struct MultiplierStructure {
     const char ID;
     const double multiplier;
@@ -187,11 +179,11 @@ struct PACKED log_GPS {
     uint16_t gps_week;
     uint8_t  num_sats;
     uint16_t hdop;
-    int32_t  latitude;//纬度
-    int32_t  longitude;//经度
-    int32_t  altitude;//高度
+    int32_t  latitude;
+    int32_t  longitude;
+    int32_t  altitude;
     float    ground_speed;
-    float    ground_course;//地面层，航向？
+    float    ground_course;
     float    vel_z;
     uint8_t  used;
 };
@@ -1132,11 +1124,6 @@ struct PACKED log_DSTL {
 // FMT messages define all message formats other than FMT
 // UNIT messages define units which can be referenced by FMTU messages
 // FMTU messages associate types (e.g. centimeters/second/second) to FMT message fields
-
-//labels
-//formats
-//units
-//multipliers
 
 #define ACC_LABELS "TimeUS,SampleUS,AccX,AccY,AccZ"
 #define ACC_FMT   "QQfff"

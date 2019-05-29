@@ -15,18 +15,16 @@ struct PACKED log_Test {
     LOG_PACKET_HEADER;
     uint16_t v1, v2, v3, v4;
     int32_t  l1, l2;
-};//????
+};
 
-//#define LOG_COMMON_STRUCTURES LOG_BASE_STRUCTURES, LOG_EXTRA_STRUCTURES, LOG_SBP_STRUCTURES 
-//LOG_COMMON_STRUCTURES?????????????BASE,EXTRA,SBP????????????????????TEST_MSG
 static const struct LogStructure log_structure[] = {
     LOG_COMMON_STRUCTURES,
     { LOG_TEST_MSG, sizeof(log_Test),       
-      "TEST",//name
-      "HHHHii",//format
-      "V1,V2,V3,V4,L1,L2",//label
-      "------",//unit
-      "------"//multipliers
+      "TEST",
+      "HHHHii",
+      "V1,V2,V3,V4,L1,L2",
+      "------",
+      "------"
     }
 };
 
@@ -53,28 +51,28 @@ void AP_LoggerTest::setup(void)
     hal.console->printf("Logger Log Test 1.0\n");
 
     log_bitmask = (uint32_t)-1;
-    logger.Init(log_structure, ARRAY_SIZE(log_structure));//???logger???????log??????????????Log_TEST_MSG
-    logger.set_vehicle_armed(true);//??vdhicle?armed
-    logger.Write_Message("AP_Logger Test");//???
+    logger.Init(log_structure, ARRAY_SIZE(log_structure));
+    logger.set_vehicle_armed(true);
+    logger.Write_Message("AP_Logger Test");
 
     // Test
     hal.scheduler->delay(20);
 
     // We start to write some info (sequentialy) starting from page 1
     // This is similar to what we will do...
-    log_num = logger.find_last_log();//?????log?????
+    log_num = logger.find_last_log();
     hal.console->printf("Using log number %u\n", log_num);
     hal.console->printf("Writing to flash... wait...\n");
 
-    uint32_t total_micros = 0;//???
+    uint32_t total_micros = 0;
     uint16_t i;
 
     for (i = 0; i < NUM_PACKETS; i++) {
-        uint32_t start = AP_HAL::micros();//????
+        uint32_t start = AP_HAL::micros();
         // note that we use g++ style initialisers to make larger
         // structures easier to follow        
         struct log_Test pkt = {
-            LOG_PACKET_HEADER_INIT(LOG_TEST_MSG),//??????
+            LOG_PACKET_HEADER_INIT(LOG_TEST_MSG),
             v1    : (uint16_t)(2000 + i),
             v2    : (uint16_t)(2001 + i),
             v3    : (uint16_t)(2002 + i),
@@ -82,16 +80,16 @@ void AP_LoggerTest::setup(void)
             l1    : (int32_t)(i * 5000),
             l2    : (int32_t)(i * 16268)
         };
-        logger.WriteBlock(&pkt, sizeof(pkt));//??????Block??
-        total_micros += AP_HAL::micros() - start;//?????
+        logger.WriteBlock(&pkt, sizeof(pkt));
+        total_micros += AP_HAL::micros() - start;
         hal.scheduler->delay(20);
     }
 
     hal.console->printf("Average write time %.1f usec/byte\n", 
-                       (double)total_micros/((double)i*sizeof(struct log_Test)));//??????????????
+                       (double)total_micros/((double)i*sizeof(struct log_Test)));
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL || CONFIG_HAL_BOARD == HAL_BOARD_LINUX
-    logger.flush();//flush
+    logger.flush();
 #endif
 
     hal.scheduler->delay(100);

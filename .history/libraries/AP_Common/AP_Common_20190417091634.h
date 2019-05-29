@@ -22,9 +22,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-//__attribute__关键字主要是用来在函数或数据声明中设置其属性。给函数赋给属性的主要目的在于让编译器进行优化。
-// used to pack structures 用于包装结构
-// __attribute__ ((packed))的作用就是告诉编译器取消结构在编译过程中的优化对齐,按照实际占用字节数进行对齐，是GCC特有的语法。
+
+// used to pack structures
 #define PACKED __attribute__((__packed__))
 
 // used to weaken symbols
