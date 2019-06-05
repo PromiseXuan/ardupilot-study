@@ -23,7 +23,7 @@ struct LogStructure {
     const char *format; //格式
     const char *labels; //标签
     const char *units;  //单位
-    const char *multipliers; //乘法器？  数量级
+    const char *multipliers; //乘法器？
 };
 
 // maximum lengths of fields in LogStructure, including trailing nulls
@@ -161,7 +161,7 @@ struct PACKED log_Parameter {
     char name[16];//名字
     float value;//值
 };
-//DSF
+
 struct PACKED log_DSF {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -172,24 +172,24 @@ struct PACKED log_DSF {
     uint32_t buf_space_max;
     uint32_t buf_space_avg;
 };
-//日志事件
+
 struct PACKED log_Event {
     LOG_PACKET_HEADER;
-    uint64_t time_us;//时间
-    uint8_t id;//id
+    uint64_t time_us;
+    uint8_t id;
 };
-//错误日志
+
 struct PACKED log_Error {
   LOG_PACKET_HEADER;
   uint64_t time_us;
-  uint8_t sub_system;//子系统
-  uint8_t error_code;//错误代码
+  uint8_t sub_system;
+  uint8_t error_code;
 };
-//GPS日志
+
 struct PACKED log_GPS {
     LOG_PACKET_HEADER;
     uint64_t time_us;
-    uint8_t  status;／／状态
+    uint8_t  status;
     uint32_t gps_week_ms;
     uint16_t gps_week;
     uint8_t  num_sats;
@@ -202,7 +202,7 @@ struct PACKED log_GPS {
     float    vel_z;
     uint8_t  used;
 };
-//GPA日志
+
 struct PACKED log_GPA {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -215,24 +215,23 @@ struct PACKED log_GPA {
     uint16_t delta_ms;
 };
 
-////消息日志
 struct PACKED log_Message {
     LOG_PACKET_HEADER;
-    uint64_t time_us;//时间
-    char msg[64];//消息
+    uint64_t time_us;
+    char msg[64];
 };
-//IMU日志（惯性传感器）
+
 struct PACKED log_IMU {
     LOG_PACKET_HEADER;
     uint64_t time_us;
-    float gyro_x, gyro_y, gyro_z;//陀螺仪
-    float accel_x, accel_y, accel_z;//加速度
-    uint32_t gyro_error, accel_error;//误差
-    float temperature;//气温？
+    float gyro_x, gyro_y, gyro_z;
+    float accel_x, accel_y, accel_z;
+    uint32_t gyro_error, accel_error;
+    float temperature;
     uint8_t gyro_health, accel_health;
     uint16_t gyro_rate, accel_rate;
 };
-//IMUDT
+
 struct PACKED log_IMUDT {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -240,12 +239,12 @@ struct PACKED log_IMUDT {
     float delta_ang_x, delta_ang_y, delta_ang_z;
     float delta_vel_x, delta_vel_y, delta_vel_z;
 };
-//ISBH
+
 struct PACKED log_ISBH {
     LOG_PACKET_HEADER;
     uint64_t time_us;
-    uint16_t seqno;//序号
-    uint8_t sensor_type; // e.g. GYRO or ACCEL　　传感器类型，如陀螺仪或加速度计
+    uint16_t seqno;
+    uint8_t sensor_type; // e.g. GYRO or ACCEL
     uint8_t instance;
     uint16_t multiplier;
     uint16_t sample_count;
@@ -253,7 +252,7 @@ struct PACKED log_ISBH {
     float sample_rate_hz;
 };
 static_assert(sizeof(log_ISBH) < 256, "log_ISBH is over-size");
-//ISBD日志
+
 struct PACKED log_ISBD {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -264,14 +263,14 @@ struct PACKED log_ISBD {
     int16_t z[32];
 };
 static_assert(sizeof(log_ISBD) < 256, "log_ISBD is over-size");
-//Vibe日志
+
 struct PACKED log_Vibe {
     LOG_PACKET_HEADER;
     uint64_t time_us;
     float vibe_x, vibe_y, vibe_z;
     uint32_t clipping_0, clipping_1, clipping_2;
 };
-//万向坐标系１日志
+
 struct PACKED log_Gimbal1 {
     LOG_PACKET_HEADER;
     uint32_t time_ms;
@@ -286,7 +285,7 @@ struct PACKED log_Gimbal1 {
     float joint_angles_y;
     float joint_angles_z;
 };
-//万向坐标系２日志
+
 struct PACKED log_Gimbal2 {
     LOG_PACKET_HEADER;
     uint32_t time_ms;
@@ -301,7 +300,7 @@ struct PACKED log_Gimbal2 {
     float target_y;
     float target_z;
 };
-//万向坐标系３日志
+
 struct PACKED log_Gimbal3 {
     LOG_PACKET_HEADER;
     uint32_t time_ms;
@@ -309,7 +308,7 @@ struct PACKED log_Gimbal3 {
     int16_t el_torque_cmd;
     int16_t az_torque_cmd;
 };
-//RC输入日志
+
 struct PACKED log_RCIN {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -328,7 +327,7 @@ struct PACKED log_RCIN {
     uint16_t chan13;
     uint16_t chan14;
 };
-//RC输出日志
+
 struct PACKED log_RCOUT {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -347,7 +346,7 @@ struct PACKED log_RCOUT {
     uint16_t chan13;
     uint16_t chan14;
 };
-//MAV日志
+
 struct PACKED log_MAV {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -356,21 +355,21 @@ struct PACKED log_MAV {
     uint16_t packet_rx_success_count;
     uint16_t packet_rx_drop_count;
 };
-//RSSI日志
+
 struct PACKED log_RSSI {
     LOG_PACKET_HEADER;
     uint64_t time_us;
     float RXRSSI;
 };
-//气压计日志
+
 struct PACKED log_BARO {
     LOG_PACKET_HEADER;
     uint64_t time_us;
-    float   altitude;//高度
-    float   pressure;//压力
-    int16_t temperature;//温度
-    float   climbrate;//爬升率
-    uint32_t sample_time_ms;//采样时间
+    float   altitude;
+    float   pressure;
+    int16_t temperature;
+    float   climbrate;
+    uint32_t sample_time_ms;
     float   drift_offset;
     float   ground_temp;
 };
@@ -1145,11 +1144,11 @@ struct PACKED log_DSTL {
 //formats
 //units
 //multipliers
-////
-#define ACC_LABELS "TimeUS,SampleUS,AccX,AccY,AccZ"　//标签 ：“时间，采样时间，X加速度，Y加速度，Z加速度”
-#define ACC_FMT   "QQfff"                           //格式：“Uint64_t,Uint64_t,float,float,float”
-#define ACC_UNITS "ssnnn"                           //单位:"s(秒),s,m/s(米每秒),m/s,m/s"
-#define ACC_MULTS "FF000"                           //数量级:"1e-6,1e-6,1e0,1e0,1e0"
+
+#define ACC_LABELS "TimeUS,SampleUS,AccX,AccY,AccZ"
+#define ACC_FMT   "QQfff"
+#define ACC_UNITS "ssnnn"
+#define ACC_MULTS "FF000"
 
 // see "struct sensor" in AP_Baro.h and "Write_Baro":
 #define BARO_LABELS "TimeUS,Alt,Press,Temp,CRt,SMS,Offset,GndTemp"
@@ -1253,9 +1252,6 @@ Format characters in the format string for binary log messages
  */
 
 // messages for all boards
-//所有板的消息
-//基础结构LOG
-//Structure {type类型，len长度，name名字，format格式，label标签，unit单位，multiplier数量级}
 #define LOG_BASE_STRUCTURES \
     { LOG_FORMAT_MSG, sizeof(log_Format), \
       "FMT", "BBnNZ",      "Type,Length,Name,Format,Columns", "-b---", "-----" },    \
@@ -1359,7 +1355,6 @@ Format characters in the format string for binary log messages
       "SRTL", "QBHHBfff", "TimeUS,Active,NumPts,MaxPts,Action,N,E,D", "s----mmm", "F----000" }
 
 // messages for more advanced boards
-//更先进板的消息
 #define LOG_EXTRA_STRUCTURES \
     { LOG_IMU2_MSG, sizeof(log_IMU), \
       "IMU2",  IMU_FMT,     IMU_LABELS, IMU_UNITS, IMU_MULTS }, \
@@ -1545,13 +1540,11 @@ Format characters in the format string for binary log messages
 // #endif
 
 #define LOG_COMMON_STRUCTURES LOG_BASE_STRUCTURES, LOG_EXTRA_STRUCTURES, LOG_SBP_STRUCTURES
-//COMMON STRUCTURES 包含上述三个结构体：所有板基结构体，先进板结构体，SBP结构体
 
 // message types 0 to 63 reserved for vehicle specific use
-//信息类型0~63保留给载具特殊使用
+
 // message types for common messages
 //信息类型--公共类型
-//枚举  信息类型
 enum LogMessages : uint8_t {
     LOG_NKF1_MSG = 64,
     LOG_NKF2_MSG,
@@ -1708,8 +1701,8 @@ enum LogMessages : uint8_t {
     _LOG_LAST_MSG_
 };
 
-static_assert(_LOG_LAST_MSG_ <= 255, "Too many message formats");//如果_LOG_LAST_MSG_>255，报错，参数格式太多
-//第一句是真则不执行后面语句，第一句为假，则生成第二局信息报错。
+static_assert(_LOG_LAST_MSG_ <= 255, "Too many message formats");
+
 enum LogOriginType {
     ekf_origin = 0,
     ahrs_home = 1

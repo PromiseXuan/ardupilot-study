@@ -26,10 +26,6 @@ class AP_Logger_Backend;
 
 // do not do anything here apart from add stuff; maintaining older
 // entries means log analysis is easier
-//除了添加东西之外，这里不做任何事情;维护旧条目意味着日志分析更容易
-//Log事件
-//注意， 在LogStructure.h里面定义的是log_Event结构体。这里定义的是Log_Event。两个有区别，首字母大小写，不要弄混了。
-
 enum Log_Event : uint8_t {
     DATA_AP_STATE = 7,
 // DATA_SYSTEM_TIME_SET = 8,
@@ -96,7 +92,6 @@ enum Log_Event : uint8_t {
     DATA_NOT_BOTTOMED = 166,
 };
 
-//日志错误子系统（发生日志记录错误的模块？）
 enum class LogErrorSubsystem : uint8_t {
     MAIN = 1,
     RADIO = 2,
@@ -130,7 +125,6 @@ enum class LogErrorSubsystem : uint8_t {
 
 // bizarrely this enumeration has lots of duplicate values, offering
 // very little in the way of typesafety
-//日志错误代码
 enum class LogErrorCode : uint8_t {
 // general error codes
     ERROR_RESOLVED  = 0,
@@ -180,55 +174,49 @@ class AP_Logger
 public:
     FUNCTOR_TYPEDEF(vehicle_startup_message_Writer, void);
 
-    AP_Logger(const AP_Int32 &log_bitmask);//构造函数
+    AP_Logger(const AP_Int32 &log_bitmask);
 
     /* Do not allow copies */
-    //禁止拷贝，赋值
     AP_Logger(const AP_Logger &other) = delete;
     AP_Logger &operator=(const AP_Logger&) = delete;
 
     // get singleton instance
-    //得到单例实例
     static AP_Logger *get_singleton(void) {
         return _singleton;
     }
 
-    // initialisation初始化
+    // initialisation
     void Init(const struct LogStructure *structure, uint8_t num_types);
     void set_num_types(uint8_t num_types) { _num_types = num_types; }
 
     bool CardInserted(void);
 
     // erase handling
-    //擦出
     void EraseAll();
 
     /* Write a block of data at current offset */
-    //在当前偏移量处写入数据块
     void WriteBlock(const void *pBuffer, uint16_t size);
     /* Write an *important* block of data at current offset */
-    //在当前偏移量处写入一个重要的数据块
     void WriteCriticalBlock(const void *pBuffer, uint16_t size);
 
     // high level interface
-    //高层次接口
-    uint16_t find_last_log() const;//找上一个log，返回id？
-    void get_log_boundaries(uint16_t log_num, uint32_t & start_page, uint32_t & end_page);//获取log的边界
-    uint16_t get_num_logs(void);//获取log的id？
+    uint16_t find_last_log() const;
+    void get_log_boundaries(uint16_t log_num, uint32_t & start_page, uint32_t & end_page);
+    uint16_t get_num_logs(void);
 
     void setVehicle_Startup_Writer(vehicle_startup_message_Writer writer);
 
     void PrepForArming();
 
-    void EnableWrites(bool enable) { _writes_enabled = enable; }//写使能
-    bool WritesEnabled() const { return _writes_enabled; }//返回使能状态
+    void EnableWrites(bool enable) { _writes_enabled = enable; }
+    bool WritesEnabled() const { return _writes_enabled; }
 
-    void StopLogging();//停止Log
+    void StopLogging();
 
-    void Write_Parameter(const char *name, float value);//写参数
-    void Write_Event(Log_Event id);//写事件
+    void Write_Parameter(const char *name, float value);
+    void Write_Event(Log_Event id);
     void Write_Error(LogErrorSubsystem sub_system,
-                     LogErrorCode error_code);//写错误，出错的错误子系统和错误代码
+                     LogErrorCode error_code);
     void Write_GPS(uint8_t instance, uint64_t time_us=0);
     void Write_IMU();
     void Write_IMUDT(uint64_t time_us, uint8_t imu_mask);
@@ -291,7 +279,6 @@ public:
     void WriteV(const char *name, const char *labels, const char *units, const char *mults, const char *fmt, va_list arg_list);
 
     // This structure provides information on the internal member data of a PID for logging purposes
-    //PID结构体
     struct PID_Info {
         float desired;
         float actual;
@@ -321,7 +308,7 @@ public:
     uint32_t num_dropped(void) const;
 
     // accesss to public parameters
-    void set_force_log_disarmed(bool force_logging) { _force_log_disarmed = force_logging; }//设置强制log解除武装？
+    void set_force_log_disarmed(bool force_logging) { _force_log_disarmed = force_logging; }
     bool log_while_disarmed(void) const {
         if (_force_log_disarmed) {
             return true;
@@ -383,7 +370,7 @@ protected:
 
 private:
     #define LOGGER_MAX_BACKENDS 2
-    uint8_t _next_backend;//下一个后端
+    uint8_t _next_backend;
     AP_Logger_Backend *backends[LOGGER_MAX_BACKENDS];
     const AP_Int32 &_log_bitmask;
 
@@ -534,7 +521,6 @@ private:
 
 };
 
-//添加logger到AP命名空间中去，可以通过AP::logger调用。
 namespace AP {
     AP_Logger &logger();
 };

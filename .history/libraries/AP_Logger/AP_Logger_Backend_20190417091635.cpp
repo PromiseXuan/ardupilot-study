@@ -5,7 +5,7 @@
 #include <AP_InternalError/AP_InternalError.h>
 
 extern const AP_HAL::HAL& hal;
-//构造函数。：至{}是初始化列表
+
 AP_Logger_Backend::AP_Logger_Backend(AP_Logger &front,
                                      class LoggerMessageWriter_DFLogStart *writer) :
     _front(front),
@@ -13,32 +13,32 @@ AP_Logger_Backend::AP_Logger_Backend(AP_Logger &front,
 {
     writer->set_logger_backend(this);
 }
-//返回num_types
+
 uint8_t AP_Logger_Backend::num_types() const
 {
     return _front._num_types;
 }
-//返回num对应的structure
+
 const struct LogStructure *AP_Logger_Backend::structure(uint8_t num) const
 {
     return _front.structure(num);
 }
-//返回units的编号
+
 uint8_t AP_Logger_Backend::num_units() const
 {
     return _front._num_units;
 }
-//返回num对应的UnitStructure结构体
+
 const struct UnitStructure *AP_Logger_Backend::unit(uint8_t num) const
 {
     return _front.unit(num);
 }
-//返回multipliers的编号
+
 uint8_t AP_Logger_Backend::num_multipliers() const
 {
     return _front._num_multipliers;
 }
-//返回num对应的multipliers结构体
+
 const struct MultiplierStructure *AP_Logger_Backend::multiplier(uint8_t num) const
 {
     return _front.multiplier(num);
@@ -47,7 +47,7 @@ const struct MultiplierStructure *AP_Logger_Backend::multiplier(uint8_t num) con
 AP_Logger_Backend::vehicle_startup_message_Writer AP_Logger_Backend::vehicle_message_writer() {
     return _front._vehicle_messages;
 }
-//periodic：周期的
+
 void AP_Logger_Backend::periodic_10Hz(const uint32_t now)
 {
 }
@@ -57,7 +57,7 @@ void AP_Logger_Backend::periodic_1Hz()
 void AP_Logger_Backend::periodic_fullrate()
 {
 }
-//周期性任务
+
 void AP_Logger_Backend::periodic_tasks()
 {
     uint32_t now = AP_HAL::millis();
@@ -147,8 +147,8 @@ bool AP_Logger_Backend::Write_Emit_FMT(uint8_t msg_type)
     char ls_multipliers[LS_MULTIPLIERS_SIZE] = {};
     struct LogStructure logstruct = {
         // these will be overwritten, but need to keep the compiler happy:
-        0,//type
-        0,//len
+        0,
+        0,
         ls_name,
         ls_format,
         ls_labels,

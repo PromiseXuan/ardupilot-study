@@ -28,8 +28,6 @@ class AP_Logger_Backend;
 // entries means log analysis is easier
 //除了添加东西之外，这里不做任何事情;维护旧条目意味着日志分析更容易
 //Log事件
-//注意， 在LogStructure.h里面定义的是log_Event结构体。这里定义的是Log_Event。两个有区别，首字母大小写，不要弄混了。
-
 enum Log_Event : uint8_t {
     DATA_AP_STATE = 7,
 // DATA_SYSTEM_TIME_SET = 8,
@@ -383,7 +381,7 @@ protected:
 
 private:
     #define LOGGER_MAX_BACKENDS 2
-    uint8_t _next_backend;//下一个后端
+    uint8_t _next_backend;
     AP_Logger_Backend *backends[LOGGER_MAX_BACKENDS];
     const AP_Int32 &_log_bitmask;
 
@@ -534,7 +532,6 @@ private:
 
 };
 
-//添加logger到AP命名空间中去，可以通过AP::logger调用。
 namespace AP {
     AP_Logger &logger();
 };
