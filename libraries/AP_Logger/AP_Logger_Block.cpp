@@ -12,7 +12,7 @@ extern AP_HAL::HAL& hal;
 // the last page holds the log format in first 4 bytes. Please change
 // this if (and only if!) the low level format changes
 #define DF_LOGGING_FORMAT    0x19012019
-
+//AP_Logger_Block构造函数
 AP_Logger_Block::AP_Logger_Block(AP_Logger &front, LoggerMessageWriter_DFLogStart *writer) :
     writebuf(0),
     AP_Logger_Backend(front, writer)
@@ -24,13 +24,16 @@ AP_Logger_Block::AP_Logger_Block(AP_Logger &front, LoggerMessageWriter_DFLogStar
 }
 
 // init is called after backend init
+//在后端初始化后调用此初始化
 void AP_Logger_Block::Init(void)
 {
     if (CardInserted()) {
         // reserve space for version in last sector
+        //为上个扇区版本保留空间
         df_NumPages -= df_PagePerSector;
 
         // determine and limit file backend buffersize
+        //确定和限制文件后端的缓冲区大小
         uint32_t bufsize = _front._params.file_bufsize;
         if (bufsize > 64) {
             bufsize = 64;
@@ -38,6 +41,7 @@ void AP_Logger_Block::Init(void)
         bufsize *= 1024;
 
         // If we can't allocate the full size, try to reduce it until we can allocate it
+        //如果我们不能分配整个大小，试图减少至我们可以分配的大小
         while (!writebuf.set_size(bufsize) && bufsize >= df_PageSize * df_PagePerSector) {
             hal.console->printf("AP_Logger_Block: Couldn't set buffer size to=%u\n", (unsigned)bufsize);
             bufsize >>= 1;
@@ -58,7 +62,7 @@ void AP_Logger_Block::Init(void)
 
     AP_Logger_Backend::Init();
 }
-
+//返回可用缓冲区大小
 uint32_t AP_Logger_Block::bufferspace_available()
 {
     // because AP_Logger_Block devices are ring buffers, we *always*
@@ -67,29 +71,33 @@ uint32_t AP_Logger_Block::bufferspace_available()
 }
 
 // *** LOGGER PUBLIC FUNCTIONS ***
+//开始写
 void AP_Logger_Block::StartWrite(uint32_t PageAdr)
 {
-    df_PageAdr    = PageAdr;
+    df_PageAdr    = PageAdr;//写的页面等于当前页面地址PageAdr
     log_write_started = true;
 }
-
+//完成写
 void AP_Logger_Block::FinishWrite(void)
 {
     // Write Buffer to flash
+    //将缓冲区写入闪存
     BufferToPage(df_PageAdr);
     df_PageAdr++;
 
     // If we reach the end of the memory, start from the beginning
+    //如果我们到了内存的结尾，从开头开始
     if (df_PageAdr > df_NumPages) {
         df_PageAdr = 1;
     }
 
     // when starting a new sector, erase it
+    //在一个新的扇区启动时，擦除扇区
     if ((df_PageAdr-1) % df_PagePerSector == 0) {
         SectorErase(df_PageAdr / df_PagePerSector);
     }
 }
-
+//判断是否写成功
 bool AP_Logger_Block::WritesOK() const
 {
     if (!CardInserted()) {
@@ -97,12 +105,13 @@ bool AP_Logger_Block::WritesOK() const
     }
     return true;
 }
-
+//WritePrioritisedBlock()会调用_WritePrioritisedBlock()函数。
 bool AP_Logger_Block::_WritePrioritisedBlock(const void *pBuffer, uint16_t size, bool is_critical)
 {
     // is_critical is ignored - we're a ring buffer and never run out
     // of space.  possibly if we do more complicated bandwidth
     // limiting we can reserve bandwidth based on is_critical
+    //忽略is_critical--我们是一个环形缓冲区，永远不会耗尽空间;可能如果我们做更复杂的带宽限制，我们可以根据is_critical保留带宽
     if (!WritesOK()) {
         return false;
     }
@@ -120,7 +129,7 @@ bool AP_Logger_Block::_WritePrioritisedBlock(const void *pBuffer, uint16_t size,
     return true;
 }
 
-
+//开始读取
 void AP_Logger_Block::StartRead(uint32_t PageAdr)
 {
     df_Read_PageAdr   = PageAdr;
@@ -139,7 +148,7 @@ void AP_Logger_Block::StartRead(uint32_t PageAdr)
     df_FilePage   = ph.FilePage;
     df_Read_BufferIdx = sizeof(ph);
 }
-
+//读取块
 bool AP_Logger_Block::ReadBlock(void *pBuffer, uint16_t size)
 {
     if (erase_started) {
@@ -183,18 +192,18 @@ bool AP_Logger_Block::ReadBlock(void *pBuffer, uint16_t size)
     }
     return true;
 }
-
+//设置文件编号
 void AP_Logger_Block::SetFileNumber(uint16_t FileNumber)
 {
     df_FileNumber = FileNumber;
     df_FilePage = 1;
 }
-
+//获取文件编号
 uint16_t AP_Logger_Block::GetFileNumber()
 {
     return df_FileNumber;
 }
-
+//擦除所有
 void AP_Logger_Block::EraseAll()
 {
     WITH_SEMAPHORE(sem);
@@ -209,12 +218,12 @@ void AP_Logger_Block::EraseAll()
     StartErase();
     erase_started = true;
 }
-
+//需要预备
 bool AP_Logger_Block::NeedPrep(void)
 {
     return NeedErase();
 }
-
+//预备
 void AP_Logger_Block::Prep()
 {
     WITH_SEMAPHORE(sem);
@@ -230,6 +239,8 @@ void AP_Logger_Block::Prep()
 /*
  *  we need to erase if the logging format has changed
  */
+//如果记录格式改变，我们需要擦除
+//需要擦除
 bool AP_Logger_Block::NeedErase(void)
 {
     uint32_t version = 0;
@@ -246,6 +257,7 @@ bool AP_Logger_Block::NeedErase(void)
 /**
   get raw data from a log
  */
+//从日志中获取行数据
 int16_t AP_Logger_Block::get_log_data_raw(uint16_t log_num, uint32_t page, uint32_t offset, uint16_t len, uint8_t *data)
 {
     WITH_SEMAPHORE(sem);
@@ -274,6 +286,7 @@ int16_t AP_Logger_Block::get_log_data_raw(uint16_t log_num, uint32_t page, uint3
 /**
   get data from a log, accounting for adding FMT headers
  */
+//从日志中获取数据，考虑添加FMT标头
 int16_t AP_Logger_Block::get_log_data(uint16_t log_num, uint16_t page, uint32_t offset, uint16_t len, uint8_t *data)
 {
     WITH_SEMAPHORE(sem);
@@ -316,6 +329,7 @@ int16_t AP_Logger_Block::get_log_data(uint16_t log_num, uint16_t page, uint32_t 
 
 // This function determines the number of whole or partial log files in the AP_Logger
 // Wholly overwritten files are (of course) lost.
+//获取日志编号
 uint16_t AP_Logger_Block::get_num_logs(void)
 {
     WITH_SEMAPHORE(sem);
@@ -355,6 +369,7 @@ uint16_t AP_Logger_Block::get_num_logs(void)
 
 
 // This function starts a new log file in the AP_Logger
+//开启新日志
 uint16_t AP_Logger_Block::start_new_log(void)
 {
     WITH_SEMAPHORE(sem);
@@ -390,6 +405,7 @@ uint16_t AP_Logger_Block::start_new_log(void)
 
 // This function finds the first and last pages of a log file
 // The first page may be greater than the last page if the AP_Logger has been filled and partially overwritten.
+//获取日志边界，日志文件的起始页和终止页
 void AP_Logger_Block::get_log_boundaries(uint16_t log_num, uint32_t & start_page, uint32_t & end_page)
 {
     WITH_SEMAPHORE(sem);
@@ -444,6 +460,7 @@ bool AP_Logger_Block::check_wrapped(void)
 
 
 // This funciton finds the last log number
+//返回最后日志编号
 uint16_t AP_Logger_Block::find_last_log(void)
 {
     WITH_SEMAPHORE(sem);
@@ -453,6 +470,7 @@ uint16_t AP_Logger_Block::find_last_log(void)
 }
 
 // This function finds the last page of the last file
+//返回最后文件的最后一页
 uint32_t AP_Logger_Block::find_last_page(void)
 {
     uint32_t look;
@@ -498,6 +516,7 @@ uint32_t AP_Logger_Block::find_last_page(void)
 }
 
 // This function finds the last page of a particular log file
+//寻找特定日志文件按的最后一页
 uint32_t AP_Logger_Block::find_last_page_of_log(uint16_t log_number)
 {
     uint32_t look;
@@ -555,7 +574,7 @@ uint32_t AP_Logger_Block::find_last_page_of_log(uint16_t log_number)
     return 0;
 }
 
-
+//获取日志信息
 void AP_Logger_Block::get_log_info(uint16_t log_num, uint32_t &size, uint32_t &time_utc)
 {
     uint32_t start, end;
@@ -571,7 +590,7 @@ void AP_Logger_Block::get_log_info(uint16_t log_num, uint32_t &size, uint32_t &t
     time_utc = 0;
 }
 
-
+//武装预备
 void AP_Logger_Block::PrepForArming()
 {
     if (logging_started()) {
@@ -581,6 +600,7 @@ void AP_Logger_Block::PrepForArming()
 }
 
 // read size bytes of data from the buffer
+//从缓冲区读取size大小的数据
 bool AP_Logger_Block::BlockRead(uint16_t IntPageAdr, void *pBuffer, uint16_t size)
 {
     memcpy(pBuffer, &buffer[IntPageAdr], size);
@@ -590,6 +610,7 @@ bool AP_Logger_Block::BlockRead(uint16_t IntPageAdr, void *pBuffer, uint16_t siz
 /*
   IO timer running on IO thread
  */
+//IO线程上的IO计时器
 void AP_Logger_Block::io_timer(void)
 {
     if (!_initialised) {

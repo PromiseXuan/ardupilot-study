@@ -81,11 +81,12 @@
   should be listed here, along with how often they should be called (in hz)
   and the maximum time they are expected to take (in microseconds)
  */
-//SCHED_TASK£¨param1,param2,param3£© :param1ÊÇÈÎÎñµÄÃû×Ö£¬param2ÊÇµ÷ÓÃÆµÂÊ£¬param3ÊÇÆÚÍû×î´óÖ´ÐÐÊ±¼ä
+//SCHED_TASKï¿½ï¿½param1,param2,param3ï¿½ï¿½ :param1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½param2ï¿½Çµï¿½ï¿½ï¿½Æµï¿½Ê£ï¿½param3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½Ê±ï¿½ï¿½
 const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(rc_loop,              100,    130),
     SCHED_TASK(throttle_loop,         50,     75),
     SCHED_TASK(update_GPS,            50,    200),
+    SCHED_TASK(update_log_test,       10,    100),
 #if OPTFLOW == ENABLED
     SCHED_TASK_CLASS(OpticalFlow,          &copter.optflow,             update,         200, 160),
 #endif
@@ -202,15 +203,19 @@ constexpr int8_t Copter::_failsafe_priorities[7];
 void Copter::setup()
 {
     // Load the default values of variables listed in var_info[]s
+    //ä»Žå‚æ•°è¡¨ä¸­åŠ è½½é»˜è®¤å‚æ•°
     AP_Param::setup_sketch_defaults();
 
     // setup storage layout for copter
+    //åˆå§‹åŒ–å‚¨å­˜çš„å¤šæ—‹ç¿¼å¸ƒå±€
     StorageManager::set_layout_copter();
 
-    init_ardupilot();//³õÊ¼»¯ardupilot
+    //ä¼ æ„Ÿå™¨åˆå§‹åŒ–ï¼Œæ³¨å†Œ
+    init_ardupilot();//ï¿½ï¿½Ê¼ï¿½ï¿½ardupilot
 
     // initialise the main loop scheduler
-	//³õÊ¼»¯Ö÷Ñ­»·ÈÎÎñ
+	//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    //åˆå§‹åŒ–æ•´ä¸ªä¸»loopçš„ä»»åŠ¡è°ƒåº¦
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks), MASK_LOG_PM);
 }
 
@@ -222,25 +227,25 @@ void Copter::loop()
 
 
 // Main loop - 400hz
-//Ö÷Ñ­»·-400hz
+//ï¿½ï¿½Ñ­ï¿½ï¿½-400hz
 void Copter::fast_loop()
 {
     // update INS immediately to get current gyro data populated
-	//Á¢¼´¸üÐÂINS¹ßÐÔµ¼º½ÏµÍ³£¬»ñÈ¡µ±Ç°ÍÓÂÝÒÇÊý¾Ý
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½INSï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     ins.update();
 
     // run low level rate controllers that only require IMU data
-	//ÔËÐÐµÍË®Æ½ËÙ¶È¿ØÖÆÆ÷£¬½ö½öÐèÒªIMU¹ßÐÔ²âÁ¿µ¥ÔªµÄÊý¾Ý
+	//ï¿½ï¿½ï¿½Ðµï¿½Ë®Æ½ï¿½Ù¶È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÒªIMUï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½ï¿½Ôªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     attitude_control->rate_controller_run();
 
     // send outputs to the motors library immediately
-	//Á¢¼´·¢ËÍÊä³öÖÁµç»ú¿â
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     motors_output();
 
     // run EKF state estimator (expensive)
     // --------------------
-	//ÔËÐÐ¿¨¶ûÂüÂË²¨×´Ì¬ÆÀ¹ÀÆ÷
-    read_AHRS();//¶ÁÈ¡º½ÐÐ×ËÌ¬Êý¾Ý
+	//ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    read_AHRS();//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½
 
 #if FRAME_CONFIG == HELI_FRAME
     update_heli_control_dynamics();
@@ -248,23 +253,23 @@ void Copter::fast_loop()
 
     // Inertial Nav
     // --------------------
-	//¹ßÐÔµ¼º½
+	//ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½
     read_inertia();
 
     // check if ekf has reset target heading or position
-	//¼ì²éekfÊÇ·ñÒÑ¾­½«Ä¿±ê±êÌâ»òÎ»ÖÃÖÃÎ»
+	//ï¿½ï¿½ï¿½ekfï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Î»
     check_ekf_reset();
 
     // run the attitude controllers
-	//ÔËÐÐ×ËÌ¬¿ØÖÆÆ÷
-    update_flight_mode();//¸üÐÂ·ÉÐÐÄ£Ê½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    update_flight_mode();//ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ä£Ê½
 
     // update home from EKF if necessary
-	//Èç¹û±ØÒªµÄ»°´ÓEKF¸üÐÂ¼Ò
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Ä»ï¿½ï¿½ï¿½EKFï¿½ï¿½ï¿½Â¼ï¿½
     update_home_from_EKF();
 
     // check if we've landed or crashed
-	//¼ì²éÎÒÃÇÊÇ·ñÒÑ¾­½µÂä»ò×¹»Ù
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¹ï¿½ï¿½
     update_land_and_crash_detectors();
 
 #if MOUNT == ENABLED
@@ -273,7 +278,7 @@ void Copter::fast_loop()
 #endif
 
     // log sensor health
-	//¼ÇÂ¼´«¸ÐÆ÷µÄ½¡¿µ×´Ì¬
+	//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½×´Ì¬
     if (should_log(MASK_LOG_ANY)) {
         Log_Sensor_Health();
     }
@@ -586,6 +591,14 @@ void Copter::update_altitude()
 
     if (should_log(MASK_LOG_CTUN)) {
         Log_Write_Control_Tuning();
+    }
+}
+
+void Copter::update_log_test()
+{
+    if(should_log(MASK_LOG_LOG_TEST))
+    {
+        log_Write_Test();
     }
 }
 

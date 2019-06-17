@@ -93,12 +93,13 @@ AP_Scheduler *AP_Scheduler::get_singleton()
 }
 
 // initialise the scheduler
+//åˆå§‹åŒ–ä»»åŠ¡ï¼Œå°†ä»»åŠ¡åˆ—è¡¨ä¼ å…¥
 void AP_Scheduler::init(const AP_Scheduler::Task *tasks, uint8_t num_tasks, uint32_t log_performance_bit)
 {
     _tasks = tasks;
     _num_tasks = num_tasks;
-    _last_run = new uint16_t[_num_tasks];
-    memset(_last_run, 0, sizeof(_last_run[0]) * _num_tasks);
+    _last_run = new uint16_t[_num_tasks];//newæ–°åˆ†é…ä¸€ä¸ªåŠ¨æ€æ•°ç»„ï¼Œå¤§å°ä¸ºä¼ é€’è¿›æ¥çš„num_tasks,å³è¯¥ä»»åŠ¡æ•°ç»„çš„å¤§å°
+    memset(_last_run, 0, sizeof(_last_run[0]) * _num_tasks);//åˆå§‹åŒ–_last_runï¼Œå°†å…¶å…ƒç´ ç½®ä¸º0
     _tick_counter = 0;
 
     // setup initial performance counters
@@ -109,24 +110,24 @@ void AP_Scheduler::init(const AP_Scheduler::Task *tasks, uint8_t num_tasks, uint
 }
 
 // one tick has passed
-//Ò»¸ötickÒÑ¾­¹ıÈ¥
+//Ò»ï¿½ï¿½tickï¿½Ñ¾ï¿½ï¿½ï¿½È¥
 void AP_Scheduler::tick(void)
 {
-    _tick_counter++;//tick¼ÆÊıÆ÷¼Ó1
+    _tick_counter++;//tickï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 }
 
 /*
   run one tick
   this will run as many scheduler tasks as we can in the specified time
  */
-//ÔËĞĞÒ»¸ötick£¬Õâ½«ÔÚÖ¸¶¨µÄÊ±¼äÄÚÔËĞĞ¾¡¿ÉÄÜ¶àµÄµ÷¶È³ÌĞòÈÎÎñ
+//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½tickï¿½ï¿½ï¿½â½«ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¾ï¿½ï¿½ï¿½ï¿½Ü¶ï¿½Äµï¿½ï¿½È³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void AP_Scheduler::run(uint32_t time_available)
 {
     uint32_t run_started_usec = AP_HAL::micros();
-    uint32_t now = run_started_usec;
+    uint32_t now = run_started_usec;//è·å–å½“å‰æ—¶é—´
 
     if (_debug > 1 && _perf_counters == nullptr) {
-        _perf_counters = new AP_HAL::Util::perf_counter_t[_num_tasks];
+        _perf_counters = new AP_HAL::Util::perf_counter_t[_num_tasks];//newä¸€ä¸ªåŠ¨æ€æ•°ç»„
         if (_perf_counters != nullptr) {
             for (uint8_t i=0; i<_num_tasks; i++) {
                 _perf_counters[i] = hal.util->perf_alloc(AP_HAL::Util::PC_ELAPSED, _tasks[i].name);
@@ -136,7 +137,10 @@ void AP_Scheduler::run(uint32_t time_available)
     
     for (uint8_t i=0; i<_num_tasks; i++) {
         uint16_t dt = _tick_counter - _last_run[i];
+        //_last_run[i]æ˜¯ä¸Šæ¬¡è¿è¡Œå®Œè¯¥ä»»åŠ¡è®°ä¸‹çš„å¾ªç¯åœˆæ•°ï¼Œ_tick_counter æ˜¯æ­¤æ—¶å¾ªç¯äº†çš„åœˆæ•°ï¼Œæ‰€ä»¥dt å°±æ˜¯ä¸Šæ¬¡è¿è¡Œåˆ°ç°åœ¨éš”çš„å¾ªç¯åœˆæ•°
         uint16_t interval_ticks = _loop_rate_hz / _tasks[i].rate_hz;
+        //_loop_rate_hz æ˜¯å¾ªç¯çš„é¢‘ç‡ï¼Œè¿™é‡Œåº”è¯¥æ˜¯50Hzï¼Œ_tasks[i].rate_hzæ˜¯æœ¬ä»»åŠ¡çš„é¢‘ç‡ï¼Œ
+        //å‡å¦‚æ˜¯20Hzï¼Œé‚£ä¹ˆinterval_ticks =2.5ï¼Œé‚£å°±åº”è¯¥æ˜¯è¿è¡Œäº†2åœˆåå†è¿›æ¥è¿è¡Œä»»åŠ¡æ—¶å°±è¯¥æ‰§è¡Œï¼Œå³ä¸­é—´è¦é—´éš”2.5åœˆ
         if (interval_ticks < 1) {
             interval_ticks = 1;
         }
@@ -169,7 +173,7 @@ void AP_Scheduler::run(uint32_t time_available)
         if (_debug > 1 && _perf_counters && _perf_counters[i]) {
             hal.util->perf_begin(_perf_counters[i]);
         }
-        _tasks[i].function();
+        _tasks[i].function();//æ‰§è¡Œå‡½æ•°
         if (_debug > 1 && _perf_counters && _perf_counters[i]) {
             hal.util->perf_end(_perf_counters[i]);
         }
@@ -236,41 +240,41 @@ float AP_Scheduler::load_average()
 void AP_Scheduler::loop()
 {
     // wait for an INS sample
-	//µÈ´ı¹ßĞÔµ¼º½ÏµÍ³²ÉÑù
+	//ï¿½È´ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½ï¿½ï¿½
     AP::ins().wait_for_sample();
 
-    const uint32_t sample_time_us = AP_HAL::micros();//²ÉÑùÊ±¼ä
+    const uint32_t sample_time_us = AP_HAL::micros();//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
     
     if (_loop_timer_start_us == 0) {
-        _loop_timer_start_us = sample_time_us;//Èç¹ûÑ­»·¼ÆÊ±µÄÊ±¼äÎª0£¬Ôò¸³ÓèÆäµ±Ç°²ÉÑùÊ±¼ä
-        _last_loop_time_s = get_loop_period_s();//×îºóÒ»´ÎÑ­»·µÄÊ±¼ä
+        _loop_timer_start_us = sample_time_us;//ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê±ï¿½ï¿½Îª0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½äµ±Ç°ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+        _last_loop_time_s = get_loop_period_s();//ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
     } else {
         _last_loop_time_s = (sample_time_us - _loop_timer_start_us) * 1.0e-6;
     }
 
     // Execute the fast loop
     // ---------------------
-	//Ö´ĞĞfast loop
+	//Ö´ï¿½ï¿½fast loop
     if (_fastloop_fn) {
-        _fastloop_fn();//Ö´ĞĞfast loopº¯Êı
+        _fastloop_fn();//Ö´ï¿½ï¿½fast loopï¿½ï¿½ï¿½ï¿½
     }
 
     // tell the scheduler one tick has passed
-	//¸æËßµ÷¶È³ÌĞòÒ»¸ötickÒÑ¾­¹ıÈ¥ÁË
-    tick();//¼ÆÊıÆ÷¼Ó1
+	//ï¿½ï¿½ï¿½ßµï¿½ï¿½È³ï¿½ï¿½ï¿½Ò»ï¿½ï¿½tickï¿½Ñ¾ï¿½ï¿½ï¿½È¥ï¿½ï¿½
+    tick();//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 
     // run all the tasks that are due to run. Note that we only
     // have to call this once per loop, as the tasks are scheduled
     // in multiples of the main loop tick. So if they don't run on
     // the first call to the scheduler they won't run on a later
     // call until scheduler.tick() is called again
-	//ÔËĞĞËùÓĞÒªÔËĞĞµÄÈÎÎñ¡£Çë×¢Òâ£¬ÎÒÃÇÖ»ĞèÃ¿¸öÑ­»·µ÷ÓÃÒ»´Î£¬ÒòÎªÈÎÎñ°´Ö÷Ñ­»·tickµÄ±¶Êı½øĞĞµ÷¶È¡£
-	//Òò´Ë£¬Èç¹ûËüÃÇÃ»ÓĞÔËĞĞµÚÒ»´Îµ÷ÓÃµ÷¶È³ÌĞò£¬ËüÃÇ½«²»»áÔÚÉÔºóµÄµ÷ÓÃÉÏÔËĞĞ£¬Ö±µ½ÔÙ´Îµ÷ÓÃscheduler.tick£¨£©ÎªÖ¹
-    const uint32_t loop_us = get_loop_period_us();//ÒÔÎ¢ÃëÎªµ¥Î»»ñÈ¡Ã¿¸öÑ­»·ÔÊĞíµÄÊ±¼ä
-    const uint32_t time_available = (sample_time_us + loop_us) - AP_HAL::micros();//¼ÆËã¿ÉÓÃÊ±¼ä£¬
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ğµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½â£¬ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Ã¿ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½tickï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½ï¿½È¡ï¿½
+	//ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½Ò»ï¿½Îµï¿½ï¿½Ãµï¿½ï¿½È³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôºï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ£ï¿½Ö±ï¿½ï¿½ï¿½Ù´Îµï¿½ï¿½ï¿½scheduler.tickï¿½ï¿½ï¿½ï¿½ÎªÖ¹
+    const uint32_t loop_us = get_loop_period_us();//ï¿½ï¿½Î¢ï¿½ï¿½Îªï¿½ï¿½Î»ï¿½ï¿½È¡Ã¿ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+    const uint32_t time_available = (sample_time_us + loop_us) - AP_HAL::micros();//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬
 	
-    run(time_available > loop_us ? 0u : time_available); //ÔËĞĞÒ»¸ötick£¬Õâ½«ÔÚÖ¸¶¨µÄÊ±¼äÄÚÔËĞĞ¾¡¿ÉÄÜ¶àµÄµ÷¶È³ÌĞòÈÎÎñ
-	//Èç¹ûtime_available > loop_us£¬Ö´ĞĞrun(0u);Èç¹ûtime_available <= loop_us,Ö´ĞĞrun(time_available);ºËĞÄrun()º¯Êı
+    run(time_available > loop_us ? 0u : time_available); //ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½tickï¿½ï¿½ï¿½â½«ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¾ï¿½ï¿½ï¿½ï¿½Ü¶ï¿½Äµï¿½ï¿½È³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//ï¿½ï¿½ï¿½time_available > loop_usï¿½ï¿½Ö´ï¿½ï¿½run(0u);ï¿½ï¿½ï¿½time_available <= loop_us,Ö´ï¿½ï¿½run(time_available);ï¿½ï¿½ï¿½ï¿½run()ï¿½ï¿½ï¿½ï¿½
 	
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     // move result of AP_HAL::micros() forward:
@@ -278,7 +282,7 @@ void AP_Scheduler::loop()
 #endif
 
     // check loop time
-	//¼ì²éÑ­»·Ê±¼ä
+	//ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½Ê±ï¿½ï¿½
     perf_info.check_loop_time(sample_time_us - _loop_timer_start_us);
         
     _loop_timer_start_us = sample_time_us;

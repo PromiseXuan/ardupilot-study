@@ -610,6 +610,7 @@ private:
     void update_super_simple_bearing(bool force_update);
     void read_AHRS(void);
     void update_altitude();
+    void update_log_test();
 
     // Attitude.cpp
     float get_pilot_desired_yaw_rate(int16_t stick_angle);
@@ -731,6 +732,7 @@ private:
     void Log_Write_GuidedTarget(uint8_t target_type, const Vector3f& pos_target, const Vector3f& vel_target);
     void Log_Write_Vehicle_Startup_Messages();
     void log_init(void);
+    void log_Write_Test();
 
     // mode.cpp
     bool set_mode(control_mode_t mode, mode_reason_t reason);

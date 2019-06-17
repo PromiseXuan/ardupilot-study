@@ -34,7 +34,7 @@ public:
 
 protected:
     /* Write a block of data at current offset */
-    bool _WritePrioritisedBlock(const void *pBuffer, uint16_t size, bool is_critical) override;
+    bool _WritePrioritisedBlock(const void *pBuffer, uint16_t size, bool is_critical) override;//override重载
 
 private:
     /*

@@ -2,6 +2,17 @@
 
 #if LOGGING_ENABLED == ENABLED
 
+//log_Test
+struct PACKED log_Test
+{
+    /* data */
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    float a_value;
+};
+
+
+
 // Code to Write and Read packets from AP_Logger log memory
 // Code to interact with the user to dump or erase logs
 
@@ -401,6 +412,8 @@ const struct LogStructure Copter::log_structure[] = {
       "DU32",  "QBI",         "TimeUS,Id,Value", "s--", "F--" },
     { LOG_DATA_FLOAT_MSG, sizeof(log_Data_Float),         
       "DFLT",  "QBf",         "TimeUS,Id,Value", "s--", "F--" },
+    { LOG_LOG_TEST_MSG, sizeof(log_Test),
+      "TEST",  "Qf",          "TimeUS,Value",    "s--", "F--" },
 #if FRAME_CONFIG == HELI_FRAME
     { LOG_HELI_MSG, sizeof(log_Heli),
       "HELI",  "Qff",         "TimeUS,DRRPM,ERRPM", "s--", "F--" },
@@ -422,6 +435,18 @@ void Copter::Log_Write_Vehicle_Startup_Messages()
     gps.Write_AP_Logger_Log_Startup_messages();
 }
 
+
+//Test
+void Copter::log_Write_Test()
+{
+    struct log_Test pkt =
+    {
+        LOG_PACKET_HEADER_INIT(LOG_TEST_MSG),
+        time_us : AP_HAL::micros64(),
+        a_value : 1234
+    };
+    logger.WriteBlock(&pkt,sizeof(pkt));
+}
 
 void Copter::log_init(void)
 {
@@ -446,6 +471,8 @@ void Copter::Log_Sensor_Health() {}
 void Copter::Log_Write_Precland() {}
 void Copter::Log_Write_GuidedTarget(uint8_t target_type, const Vector3f& pos_target, const Vector3f& vel_target) {}
 void Copter::Log_Write_Vehicle_Startup_Messages() {}
+
+void Copter::log_Write_Test()
 
 #if FRAME_CONFIG == HELI_FRAME
 void Copter::Log_Write_Heli() {}

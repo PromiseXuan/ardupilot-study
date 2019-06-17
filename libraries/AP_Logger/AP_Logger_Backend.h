@@ -3,38 +3,44 @@
 #include "AP_Logger.h"
 
 class LoggerMessageWriter_DFLogStart;
-
+//AP_Logger_Backend类
 class AP_Logger_Backend
 {
 
 public:
     FUNCTOR_TYPEDEF(vehicle_startup_message_Writer, void);
+    //typedef Functor<void> vehicle_startup_message_Writer;就是类似于将void命名为vehicle_startup_message_Writer
 
     AP_Logger_Backend(AP_Logger &front,
-                      class LoggerMessageWriter_DFLogStart *writer);
+                      class LoggerMessageWriter_DFLogStart *writer);//构造函数
 
-    vehicle_startup_message_Writer vehicle_message_writer();
+    vehicle_startup_message_Writer vehicle_message_writer();//void vehicle_message_writer();
 
     virtual bool CardInserted(void) const = 0;
-
+    //virtual 虚函数关键字， =0表明是纯虚函数
     // erase handling
+    //擦除处理
     virtual void EraseAll() = 0;
 
     virtual bool NeedPrep() = 0;
     virtual void Prep() = 0;
 
     /* Write a block of data at current offset */
+    //在当前偏移处写一个块程序
     bool WriteBlock(const void *pBuffer, uint16_t size) {
         return WritePrioritisedBlock(pBuffer, size, false);
     }
-
+    //WriteBlock(const void *pBuffer,uint16_t size)调用WritePrioritisedBlock(const void *pBuffer, uint16_t size,bool is_critical),将is_critical=false
+    //其不是紧急的写入
     bool WriteCriticalBlock(const void *pBuffer, uint16_t size) {
-        return WritePrioritisedBlock(pBuffer, size, true);
+        return WritePrioritizinglock(pBuffer, size, true);
     }
-
+    //WriteCriticalBlock(const void *pBuffer)调用WritePrioritisedBlock(const void *pBuffer, uint16_t size, bool is_critical),
+    //将is_critical=true，表明其是紧急重要的
     bool WritePrioritisedBlock(const void *pBuffer, uint16_t size, bool is_critical);
 
     // high level interface
+    //高层次的接口
     virtual uint16_t find_last_log() = 0;
     virtual void get_log_boundaries(uint16_t log_num, uint32_t & start_page, uint32_t & end_page) = 0;
     virtual void get_log_info(uint16_t log_num, uint32_t &size, uint32_t &time_utc) = 0;

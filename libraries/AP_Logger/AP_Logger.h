@@ -384,7 +384,7 @@ protected:
 private:
     #define LOGGER_MAX_BACKENDS 2
     uint8_t _next_backend;//下一个后端
-    AP_Logger_Backend *backends[LOGGER_MAX_BACKENDS];
+    AP_Logger_Backend *backends[LOGGER_MAX_BACKENDS];//后端数组？
     const AP_Int32 &_log_bitmask;
 
     enum class Backend_Type : uint8_t {

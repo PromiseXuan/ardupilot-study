@@ -80,12 +80,16 @@ void AP_Logger_Backend::start_new_log_reset_variables()
 
 // this method can be overridden to do extra things with your buffer.
 // for example, in AP_Logger_MAVLink we may push messages into the UART.
+
+//可以覆盖此方法以使用缓冲区执行额外操作。
+//例如，在AP_Logger_MAVLink中，我们可能会将消息推送到UART中。
 void AP_Logger_Backend::push_log_blocks() {
     WriteMoreStartupMessages();
 }
 
 // returns true if all format messages have been written, and thus it is OK
 // for other messages to go out to the log
+// 如果已经写了所有格式信息，就返回true。因此，其他信息可以转到log
 bool AP_Logger_Backend::WriteBlockCheckStartupMessages()
 {
 #if APM_BUILD_TYPE(APM_BUILD_Replay)
@@ -109,6 +113,7 @@ bool AP_Logger_Backend::WriteBlockCheckStartupMessages()
     // we're not writing startup messages, so this must be some random
     // caller hoping to write blocks out.  Push out log blocks - we
     // might end up clearing the buffer.....
+    //我们不是在写启动消息，所以这必须是一些希望写出块的随机调用者。推出日志块--我们最终可能会清空缓冲区
     push_log_blocks();
 
     //  even if we did finish writing startup messages, we can't
@@ -120,6 +125,7 @@ bool AP_Logger_Backend::WriteBlockCheckStartupMessages()
 }
 
 // source more messages from the startup message writer:
+//从启动消息令中获取更多消息
 void AP_Logger_Backend::WriteMoreStartupMessages()
 {
 
@@ -135,18 +141,21 @@ void AP_Logger_Backend::WriteMoreStartupMessages()
 /*
  * support for Write():
  */
+//支持Write():
 
-
+//bool Write_Emit_FMT(uint8_t msg_type) 写发射信息？
 bool AP_Logger_Backend::Write_Emit_FMT(uint8_t msg_type)
 {
     // get log structure from front end:
-    char ls_name[LS_NAME_SIZE] = {};
-    char ls_format[LS_FORMAT_SIZE] = {};
-    char ls_labels[LS_LABELS_SIZE] = {};
-    char ls_units[LS_UNITS_SIZE] = {};
-    char ls_multipliers[LS_MULTIPLIERS_SIZE] = {};
+    //从前端获取日志结构
+    char ls_name[LS_NAME_SIZE] = {};//name
+    char ls_format[LS_FORMAT_SIZE] = {};//format
+    char ls_labels[LS_LABELS_SIZE] = {};//label
+    char ls_units[LS_UNITS_SIZE] = {};//unit
+    char ls_multipliers[LS_MULTIPLIERS_SIZE] = {};//multiplier
     struct LogStructure logstruct = {
-        // these will be overwritten, but need to keep the compiler happy:
+        // these will be overwritten, but need to keep the compiler happy: 
+        //这些会被重写，但是要保证编译器happy，（通过下面fill_log_write_logstructure(logstructure,msg_type)函数重新赋值）
         0,//type
         0,//len
         ls_name,
@@ -159,25 +168,28 @@ bool AP_Logger_Backend::Write_Emit_FMT(uint8_t msg_type)
         // this is a bug; we've been asked to write out the FMT
         // message for a msg_type, but the frontend can't supply the
         // required information
+        //这是一个bug; 我们被要求为msg_type写出FMT消息，但是前端无法提供所需的信息
         AP::internalerror().error(AP_InternalError::error_t::logger_missing_logstructure);
         return false;
-    }
+    }//如果不能写出msg_type类型的日志结构，返回false;;;
+    //将msg_type类型的结构体写入logstruct中，失败返回false.
 
     if (!Write_Format(&logstruct)) {
         return false;
-    }
+    }//写入格式结构体（所有载具类型的log结构体的公共部分log_Format），失败返回false
     if (!Write_Format_Units(&logstruct)) {
         return false;
-    }
+    }//写入单位格式结构体(log_Format_Units)，失败返回false
 
     return true;
 }
-
+//write（）函数
 bool AP_Logger_Backend::Write(const uint8_t msg_type, va_list arg_list, bool is_critical)
 {
     // stack-allocate a buffer so we can WriteBlock(); this could be
     // 255 bytes!  If we were willing to lose the WriteBlock
     // abstraction we could do WriteBytes() here instead?
+    //栈分配了一个缓冲区，于是我们可以WriteBlock()。它是255位。如果我们愿意丢失WriteBlock抽象，我们可以在这里做WriteBytes（）吗？
     const char *fmt  = nullptr;
     uint8_t msg_len;
     AP_Logger::log_write_fmt *f;
@@ -197,21 +209,21 @@ bool AP_Logger_Backend::Write(const uint8_t msg_type, va_list arg_list, bool is_
     }
     uint8_t buffer[msg_len];
     uint8_t offset = 0;
-    buffer[offset++] = HEAD_BYTE1;
-    buffer[offset++] = HEAD_BYTE2;
-    buffer[offset++] = msg_type;
+    buffer[offset++] = HEAD_BYTE1;//head1
+    buffer[offset++] = HEAD_BYTE2;//head2
+    buffer[offset++] = msg_type;//msg_type
     for (uint8_t i=0; i<strlen(fmt); i++) {
         uint8_t charlen = 0;
         switch(fmt[i]) {
         case 'b': {
-            int8_t tmp = va_arg(arg_list, int);
+            int8_t tmp = va_arg(arg_list, int);//根据不同的数据类型来赋值，比如'b'代表'int8_t'
             memcpy(&buffer[offset], &tmp, sizeof(int8_t));
             offset += sizeof(int8_t);
             break;
         }
         case 'h':
         case 'c': {
-            int16_t tmp = va_arg(arg_list, int);
+            int16_t tmp = va_arg(arg_list, int);//'c':'int16_t'
             memcpy(&buffer[offset], &tmp, sizeof(int16_t));
             offset += sizeof(int16_t);
             break;
@@ -288,7 +300,7 @@ bool AP_Logger_Backend::Write(const uint8_t msg_type, va_list arg_list, bool is_
 
     return WritePrioritisedBlock(buffer, msg_len, is_critical);
 }
-
+//检查是否启动新的Log
 bool AP_Logger_Backend::StartNewLogOK() const
 {
     if (logging_started()) {
@@ -305,7 +317,7 @@ bool AP_Logger_Backend::StartNewLogOK() const
     }
     return true;
 }
-
+//validate 验证，校验
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
 void AP_Logger_Backend::validate_WritePrioritisedBlock(const void *pBuffer,
                                                        uint16_t size)
@@ -327,14 +339,14 @@ void AP_Logger_Backend::validate_WritePrioritisedBlock(const void *pBuffer,
     if (((uint8_t*)pBuffer)[0] != HEAD_BYTE1 ||
         ((uint8_t*)pBuffer)[1] != HEAD_BYTE2) {
         AP_HAL::panic("Not passed a message");
-    }
-    const uint8_t type = ((uint8_t*)pBuffer)[2];
+    }//检验日志包头中是否符合定义，不符合表示接受的不是传递来的信息。
+    const uint8_t type = ((uint8_t*)pBuffer)[2];//pBuffer[0],pBuffer[1]分别是head1,head2;pBuffer[2]才是MSG_TYPE
     uint8_t type_len;
-    const struct LogStructure *s = _front.structure_for_msg_type(type);
+    const struct LogStructure *s = _front.structure_for_msg_type(type);//获取消息类型为type类型的LogStructure结构体
     if (s == nullptr) {
-        const struct AP_Logger::log_write_fmt *t = _front.log_write_fmt_for_msg_type(type);
+        const struct AP_Logger::log_write_fmt *t = _front.log_write_fmt_for_msg_type(type);//如果s是空指针，则新建一个指向msg_type类型为type的log_write_fmt结构体
         if (t == nullptr) {
-            AP_HAL::panic("No structure for msg_type=%u", type);
+            AP_HAL::panic("No structure for msg_type=%u", type);//指针t仍未空，则表明没有找到该type类型的log_write_fmt结构体。
         }
         type_len = t->msg_len;
     } else {
@@ -348,7 +360,7 @@ void AP_Logger_Backend::validate_WritePrioritisedBlock(const void *pBuffer,
     }
 }
 #endif
-
+//WritePrioritisedBlock()
 bool AP_Logger_Backend::WritePrioritisedBlock(const void *pBuffer, uint16_t size, bool is_critical)
 {
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL

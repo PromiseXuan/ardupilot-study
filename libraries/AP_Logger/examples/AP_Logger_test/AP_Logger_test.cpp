@@ -54,7 +54,7 @@ void AP_LoggerTest::setup(void)
 
     log_bitmask = (uint32_t)-1;
     logger.Init(log_structure, ARRAY_SIZE(log_structure));//???logger???????log??????????????Log_TEST_MSG
-    logger.set_vehicle_armed(true);//??vdhicle?armed
+    logger.set_vehicle_armed(true);//??vehicle?armed
     logger.Write_Message("AP_Logger Test");//???
 
     // Test

@@ -23,15 +23,18 @@ extern const AP_HAL::HAL& hal;
 /*
   write a structure format to the log - should be in frontend
  */
+//写一个format结构体到日志中--应该在前端
+//log_Format{HEADER,type,len,name,format,label}
+//其实就是将logStructure中的数据填充到log_Format
 void AP_Logger_Backend::Fill_Format(const struct LogStructure *s, struct log_Format &pkt)
 {
-    memset(&pkt, 0, sizeof(pkt));
+    memset(&pkt, 0, sizeof(pkt));//将pkt所在内存按字节初始化为0
     pkt.head1 = HEAD_BYTE1;
     pkt.head2 = HEAD_BYTE2;
     pkt.msgid = LOG_FORMAT_MSG;
     pkt.type = s->msg_type;
     pkt.length = s->msg_len;
-    strncpy(pkt.name, s->name, sizeof(pkt.name));
+    strncpy(pkt.name, s->name, sizeof(pkt.name));//将s->name对应的字符串拷贝到pkt.name中，最多复制大小为sizeof(pkt->name)，若len(s->name) < len(pkt.name),剩余空间用空字符填充
     strncpy(pkt.format, s->format, sizeof(pkt.format));
     strncpy(pkt.labels, s->labels, sizeof(pkt.labels));
 }
@@ -39,6 +42,8 @@ void AP_Logger_Backend::Fill_Format(const struct LogStructure *s, struct log_For
 /*
   Pack a LogStructure packet into a structure suitable to go to the logfile:
  */
+//将LogStructure数据包打包到适合的结构转到日志文件
+//log_Format_Unit{HEADER,time,format_type,unit,multiplier}
 void AP_Logger_Backend::Fill_Format_Units(const struct LogStructure *s, struct log_Format_Units &pkt)
 {
     memset(&pkt, 0, sizeof(pkt));
@@ -54,6 +59,7 @@ void AP_Logger_Backend::Fill_Format_Units(const struct LogStructure *s, struct l
 /*
   write a structure format to the log
  */
+//写一个格式结构体到日志中
 bool AP_Logger_Backend::Write_Format(const struct LogStructure *s)
 {
     struct log_Format pkt;

@@ -117,7 +117,7 @@ public:
         return _active_loop_rate_hz;
     }
     // get the time-allowed-per-loop in microseconds
-	//ÒÔÎ¢ÃëÎªµ¥Î»»ñÈ¡Ã¿Ñ­»·ÔÊĞíµÄÊ±¼ä
+	//ï¿½ï¿½Î¢ï¿½ï¿½Îªï¿½ï¿½Î»ï¿½ï¿½È¡Ã¿Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
     uint32_t get_loop_period_us() {
         if (_loop_period_us == 0) {
             _loop_period_us = 1000000UL / _loop_rate_hz;
@@ -151,10 +151,11 @@ public:
 
 private:
     // function that is called before anything in the scheduler table:
-	//ÔÚµ÷¶È³ÌĞò±íÖĞµÄÈÎºÎÄÚÈİÖ®Ç°µ÷ÓÃµÄº¯Êı
+	//ï¿½Úµï¿½ï¿½È³ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½ï¿½Îºï¿½ï¿½ï¿½ï¿½ï¿½Ö®Ç°ï¿½ï¿½ï¿½ÃµÄºï¿½ï¿½ï¿½
     scheduler_fastloop_fn_t _fastloop_fn;
 
     // used to enable scheduler debugging
+    //ç”¨äºå¯åŠ¨è°ƒåº¦ç¨‹åº
     AP_Int8 _debug;
 
     // overall scheduling rate in Hz
